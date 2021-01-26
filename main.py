@@ -22,7 +22,7 @@ def main():
     cores = multiprocessing.cpu_count()
     
     print("preparing models\n if you have nothing in data folder, then you got mistake in w2v.train method")
-    w2v_model = Word2Vec(min_count=5,
+    w2v_model = Word2Vec(min_count=1,
                         window=6,
                         size=300,
                         workers=cores-1)

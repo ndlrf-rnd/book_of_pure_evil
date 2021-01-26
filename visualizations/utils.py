@@ -2,8 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
 
-eng_keys = ['power', 'good', 'evil', 'hitler', 'propaganda', 'think', 'school', 'peace', 'war', "future", "past", 'jews', "easy", 'hard']
-ru_keys = ['сила', 'добро', 'зло', 'гитлер', 'пропаганда', 'мысль', 'школа', 'мир', 'война', "будущее", "прошлое", 'еврей']
+ru_keys = ['сила', 'добро', 'зло', 'мысль', 'школа', 'мир', 'война', "будущее"]
 
 def tsne_prep(model, keys=ru_keys):
   """
