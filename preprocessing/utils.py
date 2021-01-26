@@ -93,5 +93,5 @@ def w2v_bigram_prep(data):
 
     phrases = Phrases(data, min_count=1, progress_per=10000)
     bigram = Phraser(phrases)
-    transformed_corpus = bigram[clean]
+    transformed_corpus = bigram[data]
     return transformed_corpus

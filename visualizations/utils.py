@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
-% matplotlib inline
 
 eng_keys = ['power', 'good', 'evil', 'hitler', 'propaganda', 'think', 'school', 'peace', 'war', "future", "past", 'jews', "easy", 'hard']
 ru_keys = ['сила', 'добро', 'зло', 'гитлер', 'пропаганда', 'мысль', 'школа', 'мир', 'война', "будущее", "прошлое", 'еврей']
@@ -31,6 +30,7 @@ def tsne_prep(model, keys=ru_keys):
 
 def tsne_plot_similar_words(labels, embedding_clusters, word_clusters, a=0.7, output_path='./'):
     """
+    taken from: https://habr.com/en/company/mailru/blog/449984/
     Function takes keys for w2v and embeddings takes from it
     Saves vizualization of embeddings in 2d
     Args:
