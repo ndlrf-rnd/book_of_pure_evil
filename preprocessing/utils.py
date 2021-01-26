@@ -4,7 +4,7 @@ import spacy
 from tika import parser
 from gensim.models.phrases import Phrases, Phraser
 
-def reading_txt(txt_folder='../data/'):
+def reading_txt(txt_folder):
     """
     Function reads txt files and replace double line breaks in it
     Returns string where all txt content concatenated in one string
@@ -25,7 +25,7 @@ def reading_txt(txt_folder='../data/'):
         data += readed
     return data
 
-def reading_pdf(pdf_folder='../data/'):
+def reading_pdf(pdf_folder):
     """
     Function reads pdf files and replace double line breaks in it
     Returns string where all pdf content concatenated in one string
@@ -70,7 +70,7 @@ def cleaning_lemmatization(data, language='ru'):
     assert type(language) == str, 'invalid arg in cleaning_lemmatization function'
 
     brief_cleaning = []
-    nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])
+    nlp = spacy.load('preprocessing/ru2', disable=['tagger', 'parser', 'NER'])
     if language == 'ru':
       brief_cleaning = [re.sub("[^А-Яа-я]+", ' ', str(sentence)).lower() for sentence in data.split('.')]
     elif language == 'en':
