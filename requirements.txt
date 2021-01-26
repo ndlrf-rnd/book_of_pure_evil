@@ -1,0 +1,7 @@
+tika==1.24
+pymorphy2==0.8
+spacy==2.1.9
+gensim==3.6.0
+numpy==1.19.5
+matplotlib==3.2.2
+sklearn
