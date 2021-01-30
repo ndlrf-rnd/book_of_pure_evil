@@ -5,6 +5,7 @@ from sklearn.manifold import TSNE
 import multiprocessing
 import gc
 import fasttext
+import pandas as pd
 
 def main():
     print("preparing data")

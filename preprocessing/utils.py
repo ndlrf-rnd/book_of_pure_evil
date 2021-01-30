@@ -1,6 +1,7 @@
 import re
 import glob
 import spacy
+import ru2
 from tika import parser
 from gensim.models.phrases import Phrases, Phraser
 
@@ -69,7 +70,7 @@ def cleaning_lemmatization(data, language='ru'):
     assert type(data) == str, 'invalid arg in cleaning_lemmatization function'
     assert type(language) == str, 'invalid arg in cleaning_lemmatization function'
     brief_cleaning = []
-    nlp = ru2.load_ru2('ru2')
+    nlp = ru2.load_ru2('./ru2')
     # nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])
 
     data = data.replace('ъ', '')

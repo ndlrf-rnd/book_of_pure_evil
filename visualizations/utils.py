@@ -3,6 +3,7 @@ import matplotlib.cm as cm
 import numpy as np
 import fasttext
 from gensim.models import Word2Vec
+import gensim
 
 ru_keys = ['сила', 'добро', 'зло', 'мысль', 'школа', 'мир', 'война', "будущее", 'россия', 'германия']
 
