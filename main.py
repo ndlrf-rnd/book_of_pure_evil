@@ -4,6 +4,7 @@ from gensim.models import Word2Vec
 from sklearn.manifold import TSNE
 import multiprocessing
 import gc
+import fasttext
 
 def main():
     print("preparing data")
@@ -17,8 +18,6 @@ def main():
     del data
     gc.collect()
     sentences = w2v_bigram_prep(txt)
-    del txt
-    gc.collect()
     cores = multiprocessing.cpu_count()
     
     print("preparing models\n if you have nothing in data folder, then you got mistake in w2v.train method")
@@ -31,11 +30,32 @@ def main():
     w2v_model.save('models/banned_books_w2v.model')
     print("getting viz")
     embedding_clusters, word_clusters = tsne_prep(w2v_model)
+    tsne_model_en_2d = TSNE(perplexity=20, n_components=2, init='pca', n_iter=6000, random_state=32)
+    embedding_clusters = np.array(embedding_clusters)
+    n, m, k = embedding_clusters.shape
+    embeddings_en_2d = np.array(tsne_model_en_2d.fit_transform(embedding_clusters.reshape(n * m, k))).reshape(n, m, 2)
+    tsne_plot_similar_words(ru_keys, embeddings_en_2d, word_clusters, name_addition='w2v_banned')
+
+    txt_fasttext = [' '.join(sentence) for sentence in txt]
+    df_train = pd.DataFrame({'txt': txt_fasttext})
+    df_train[['txt']].to_csv('train_data.txt', header=False, index=False, sep="\t")
+    model = fasttext.train_unsupervised('train_data.txt', model='skipgram')
+
+    embedding_clusters, word_clusters = tsne_prep(model)
     tsne_model_en_2d = TSNE(perplexity=40, n_components=2, init='pca', n_iter=6000, random_state=32)
     embedding_clusters = np.array(embedding_clusters)
     n, m, k = embedding_clusters.shape
     embeddings_en_2d = np.array(tsne_model_en_2d.fit_transform(embedding_clusters.reshape(n * m, k))).reshape(n, m, 2)
-    tsne_plot_similar_words(ru_keys, embeddings_en_2d, word_clusters)
+    tsne_plot_similar_words(ru_keys, embeddings_en_2d, word_clusters, name_addition='fasttext_skipgram')
+
+    model = fasttext.train_unsupervised('train_data.txt', model='cbow')
+    embedding_clusters, word_clusters = tsne_prep(model)
+    tsne_model_en_2d = TSNE(perplexity=40, n_components=2, init='pca', n_iter=6000, random_state=32)
+    embedding_clusters = np.array(embedding_clusters)
+    n, m, k = embedding_clusters.shape
+    embeddings_en_2d = np.array(tsne_model_en_2d.fit_transform(embedding_clusters.reshape(n * m, k))).reshape(n, m, 2)
+    tsne_plot_similar_words(ru_keys, embeddings_en_2d, word_clusters, name_addition='fasttext_cbow')
+    
 
 if __name__ == '__main__':
     main()

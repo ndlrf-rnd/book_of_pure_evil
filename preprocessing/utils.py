@@ -68,13 +68,18 @@ def cleaning_lemmatization(data, language='ru'):
     """
     assert type(data) == str, 'invalid arg in cleaning_lemmatization function'
     assert type(language) == str, 'invalid arg in cleaning_lemmatization function'
-
     brief_cleaning = []
-    nlp = spacy.load('preprocessing/ru2', disable=['tagger', 'parser', 'NER'])
+    nlp = ru2.load_ru2('ru2')
+    # nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])
+
+    data = data.replace('ъ', '')
+    data = data.replace('-', '')
+    splitted_data = data.split('.')
+
     if language == 'ru':
-      brief_cleaning = [re.sub("[^А-Яа-я]+", ' ', str(sentence)).lower() for sentence in data.split('.')]
+      brief_cleaning = [re.sub("[^А-Яа-я]+", ' ', str(sentence)).lower() for sentence in splitted_data]
     elif language == 'en':
-      brief_cleaning = [re.sub("[^A-Za-z]+", ' ', str(sentence)).lower() for sentence in data.split('.')]
+      brief_cleaning = [re.sub("[^A-Za-z]+", ' ', str(sentence)).lower() for sentence in splitted_data]
     txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
     txt = [sentence for sentence in txt if sentence != None]
     txt = [sentence.replace('  ', '').split(' ') for sentence in txt]

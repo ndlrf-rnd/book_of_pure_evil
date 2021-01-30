@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
+import fasttext
+from gensim.models import Word2Vec
 
-ru_keys = ['сила', 'добро', 'зло', 'мысль', 'школа', 'мир', 'война', "будущее"]
+ru_keys = ['сила', 'добро', 'зло', 'мысль', 'школа', 'мир', 'война', "будущее", 'россия', 'германия']
 
 def tsne_prep(model, keys=ru_keys):
   """
@@ -20,16 +22,22 @@ def tsne_prep(model, keys=ru_keys):
   for word in keys:
       embeddings = []
       words = []
-      for similar_word, _ in model.most_similar(word, topn=30):
-          words.append(similar_word)
-          embeddings.append(model[similar_word])
-      embedding_clusters.append(embeddings)
-      word_clusters.append(words)
+      if type(model) == fasttext.FastText._FastText:
+        for _, similar_word in model.get_nearest_neighbors(word, k=30):
+            words.append(similar_word)
+            embeddings.append(model[similar_word])
+        embedding_clusters.append(embeddings)
+        word_clusters.append(words)
+      elif type(model) == gensim.models.word2vec.Word2Vec:
+        for similar_word, _ in model.most_similar(word, topn=30):
+            words.append(similar_word)
+            embeddings.append(model[similar_word])
+        embedding_clusters.append(embeddings)
+        word_clusters.append(words)
   return embedding_clusters, word_clusters
 
-def tsne_plot_similar_words(labels, embedding_clusters, word_clusters, a=0.7, output_path='./'):
+def tsne_plot_similar_words(labels, embedding_clusters, word_clusters, a=0.7, output_path='./', name_addition=''):
     """
-    taken from: https://habr.com/en/company/mailru/blog/449984/
     Function takes keys for w2v and embeddings takes from it
     Saves vizualization of embeddings in 2d
     Args:
@@ -45,7 +53,7 @@ def tsne_plot_similar_words(labels, embedding_clusters, word_clusters, a=0.7, ou
         y = embeddings[:,1]
         plt.scatter(x, y, c=color, alpha=a, label=label)
         for i, word in enumerate(words):
-            plt.annotate(word, alpha=0.5, xy=(x[i], y[i]), xytext=(5, 2), 
+            plt.annotate(word, alpha=0.5, xy=(x[i], y[i]), xytext=(5, 2),
                          textcoords='offset points', ha='right', va='bottom', size=8)
     plt.legend(loc=4)
-    plt.savefig(output_path + "tsne_viz.png", format='png', dpi=250, bbox_inches='tight')
+    plt.savefig(output_path + f"tsne_viz_{name_addition}.png", format='png', dpi=250, bbox_inches='tight')
