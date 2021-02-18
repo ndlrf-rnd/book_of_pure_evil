@@ -4,6 +4,7 @@ import spacy
 import ru2
 from tika import parser
 from gensim.models.phrases import Phrases, Phraser
+from nltk.stem.snowball import SnowballStemmer
 
 def reading_txt(txt_folder):
     """
@@ -22,7 +23,6 @@ def reading_txt(txt_folder):
     for txt in glob.glob(txt_folder + '*.txt'):
         with open(txt, 'r') as f:
             readed = f.read()
-        readed = readed.replace('\n\n', ' ')
         data += readed
     return data
 
@@ -43,21 +43,26 @@ def reading_pdf(pdf_folder):
     for pdf in glob.glob(pdf_folder + '*.pdf'):
         raw = parser.from_file(pdf)
         readed = raw['content']
-        readed = readed.replace('\n\n', ' ')
+        readed = readed.replace('\xa0', '')
+        readed = readed.replace('\xad', '')
         data += readed
     return data
 
-def cleaning(doc):
+def cleaning(doc, method='lemmatization'):
     # Lemmatizes and removes stopwords
     # doc needs to be a spacy Doc object
-    txt = [token.lemma_ for token in doc if not token.is_stop]
+    if method == 'stemming':
+      stemmer = SnowballStemmer("russian")
+      txt = [stemmer.stem(token.text) for token in doc if not token.is_stop]
+    else:
+      txt = [token.lemma_ for token in doc if not token.is_stop]
     # Word2Vec uses context words to learn the vector representation of a target word,
     # if a sentence is only one or two words long,
     # the benefit for the training is very small
     if len(txt) > 2:
         return ' '.join(txt)
 
-def cleaning_lemmatization(data, language='ru'):
+def cleaning_lemmatization(data, language='ru', split_by='sentences', proc_method='lemmatization'):
     """
     Function reads string data, remove punctuation, lower and split text by dots
     Returns lemmatized and cleaned from punctuation list of strings
@@ -70,18 +75,20 @@ def cleaning_lemmatization(data, language='ru'):
     assert type(data) == str, 'invalid arg in cleaning_lemmatization function'
     assert type(language) == str, 'invalid arg in cleaning_lemmatization function'
     brief_cleaning = []
-    nlp = ru2.load_ru2('./ru2')
+    nlp = ru2.load_ru2('ru2')
     # nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])
-
+    
     data = data.replace('ъ', '')
-    data = data.replace('-', '')
-    splitted_data = data.split('.')
+    if split_by == 'sentences':
+      splitted_data = data.split('.')
+    elif split_by == 'paragraph':
+      splitted_data = data.split('\n\n')
 
     if language == 'ru':
       brief_cleaning = [re.sub("[^А-Яа-я]+", ' ', str(sentence)).lower() for sentence in splitted_data]
     elif language == 'en':
       brief_cleaning = [re.sub("[^A-Za-z]+", ' ', str(sentence)).lower() for sentence in splitted_data]
-    txt = [cleaning(doc) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
+    txt = [cleaning(doc, proc_method) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
     txt = [sentence for sentence in txt if sentence != None]
     txt = [sentence.replace('  ', '').split(' ') for sentence in txt]
     return txt
