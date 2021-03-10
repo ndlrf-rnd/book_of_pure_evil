@@ -2,11 +2,12 @@ import re
 import glob
 import spacy
 import ru2
+import fitz
+import os
 from tika import parser
 from gensim.models.phrases import Phrases, Phraser
-from nltk.stem.snowball import SnowballStemmer
 
-def reading_txt(txt_folder):
+def reading_txt(txt_folder='../data/'):
     """
     Function reads txt files and replace double line breaks in it
     Returns string where all txt content concatenated in one string
@@ -15,83 +16,45 @@ def reading_txt(txt_folder):
     Returns:
       data (string): content from txt folder
     """
-    assert type(txt_folder) == str, 'invalid path in reading_txt function'
-    assert len(txt_folder) > 0, 'invalid path in reading_txt function'
-    assert txt_folder[-1] == '/', 'add "/" in argument of reading_txt function'
+    books = []
+    for txt in glob.glob(os.path.join(txt_folder, '*.txt')):
+        print(txt)
+        data = ''
+        try:
+            with open(txt, 'r') as f:
+                readed = f.read()
+                readed = re.sub("[^А-Яа-я\ \t\n,.!?]+", '', readed)
+                data += ' ' + readed
+            books.append(data)
+        except:
+            print(f'error occured while reading {txt}')
+    return books
 
-    data = ''
-    for txt in glob.glob(txt_folder + '*.txt'):
-        with open(txt, 'r') as f:
-            readed = f.read()
-        data += readed
-    return data
-
-def reading_pdf(pdf_folder):
+def reading_pdf(pdf_folder='../data/'):
     """
     Function reads pdf files and replace double line breaks in it
     Returns string where all pdf content concatenated in one string
     Args:
-      pdf_folder (string): where data is located ex.: './path/'
+      txt_folder (string): where data is located ex.: './path/'
     Returns:
-      data (string): content from pdf folder
+      data (list): content from txt folder split by books
     """
     assert type(pdf_folder) == str, 'invalid path in reading_pdf function'
     assert len(pdf_folder) > 0, 'invalid path in reading_pdf function'
-    assert pdf_folder[-1] == '/', 'add "/" in argument of reading_pdf function'
-
-    data = ''
-    for pdf in glob.glob(pdf_folder + '*.pdf'):
-        raw = parser.from_file(pdf)
-        readed = raw['content']
-        readed = readed.replace('\xa0', '')
-        readed = readed.replace('\xad', '')
-        data += readed
-    return data
-
-def cleaning(doc, method='lemmatization'):
-    # Lemmatizes and removes stopwords
-    # doc needs to be a spacy Doc object
-    if method == 'stemming':
-      stemmer = SnowballStemmer("russian")
-      txt = [stemmer.stem(token.text) for token in doc if not token.is_stop]
-    else:
-      txt = [token.lemma_ for token in doc if not token.is_stop]
-    # Word2Vec uses context words to learn the vector representation of a target word,
-    # if a sentence is only one or two words long,
-    # the benefit for the training is very small
-    if len(txt) > 2:
-        return ' '.join(txt)
-
-def cleaning_lemmatization(data, language='ru', split_by='sentences', proc_method='lemmatization'):
-    """
-    Function reads string data, remove punctuation, lower and split text by dots
-    Returns lemmatized and cleaned from punctuation list of strings
-    Args:
-        data (string): raw content from read functions
-        language (string): what data we use for analysis
-    Returns:
-        cleaned (list): lemmatized and cleaned from punctuation list of strings
-    """
-    assert type(data) == str, 'invalid arg in cleaning_lemmatization function'
-    assert type(language) == str, 'invalid arg in cleaning_lemmatization function'
-    brief_cleaning = []
-    nlp = ru2.load_ru2('ru2')
-    # nlp = spacy.load('ru2', disable=['tagger', 'parser', 'NER'])
-    
-    data = data.replace('ъ', '')
-    if split_by == 'sentences':
-      splitted_data = data.split('.')
-    elif split_by == 'paragraph':
-      splitted_data = data.split('\n\n')
-
-    if language == 'ru':
-      brief_cleaning = [re.sub("[^А-Яа-я]+", ' ', str(sentence)).lower() for sentence in splitted_data]
-    elif language == 'en':
-      brief_cleaning = [re.sub("[^A-Za-z]+", ' ', str(sentence)).lower() for sentence in splitted_data]
-    txt = [cleaning(doc, proc_method) for doc in nlp.pipe(brief_cleaning, batch_size=5000, n_threads=-1)]
-    txt = [sentence for sentence in txt if sentence != None]
-    txt = [sentence.replace('  ', '').split(' ') for sentence in txt]
-    return txt
+    books = []
+    for pdf in glob.glob(os.path.join(pdf_folder, '*.pdf')):
+        print(pdf)
+        data = ''
+        pdf_document = pdf 
+        doc = fitz.open(pdf_document)
+        print ("number of pages: %i" % doc.pageCount)
+        for page_num in range(doc.pageCount):
+            page1 = doc.loadPage(page_num)
+            page1text = page1.getText("text")
+            page1text = re.sub("[^А-Яа-я\ \t\n,.!?]+", '', page1text)
+            data += ' ' + page1text + ' '
+        books.append(data)
+    return books
 
 def w2v_bigram_prep(data):
     """

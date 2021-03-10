@@ -1,6 +1,7 @@
 from visualizations.utils import *
 from preprocessing.utils import *
 from gensim.models import Word2Vec
+from nltk.tokenize import sent_tokenize
 from sklearn.manifold import TSNE
 import multiprocessing
 import gc
@@ -15,13 +16,16 @@ def main():
     del pdf_goods
     del txt_goods
     gc.collect()
-    txt = cleaning_lemmatization(data)
-    del data
-    gc.collect()
-    sentences = w2v_bigram_prep(txt)
-    cores = multiprocessing.cpu_count()
     
-    print("preparing models\n if you have nothing in data folder, then you got mistake in w2v.train method")
+    print(len(data))
+    sentences = []
+    for book in data:
+        sentences.extend(sent_tokenize(book))
+    sentences = w2v_bigram_prep(sentences)
+    cores = multiprocessing.cpu_count()
+
+
+    print("preparing models\n")
     w2v_model = Word2Vec(min_count=1,
                         window=6,
                         size=300,
@@ -59,4 +63,6 @@ def main():
     
 
 if __name__ == '__main__':
+    import nltk
+    nltk.download('punkt')
     main()

@@ -6,3 +6,5 @@ numpy
 matplotlib==3.2.2
 sklearn
 fasttext
+fitz
+PyMuPDF
