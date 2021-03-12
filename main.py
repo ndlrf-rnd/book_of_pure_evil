@@ -5,6 +5,7 @@ from nltk.tokenize import sent_tokenize
 from sklearn.manifold import TSNE
 import multiprocessing
 import gc
+import copy
 import fasttext
 import pandas as pd
 
@@ -13,6 +14,7 @@ def main():
     pdf_goods = reading_pdf('data/')
     txt_goods = reading_txt('data/')
     data = pdf_goods + txt_goods
+    data = copy.deepcopy(pdf_goods)
     del pdf_goods
     del txt_goods
     gc.collect()
@@ -21,7 +23,8 @@ def main():
     sentences = []
     for book in data:
         sentences.extend(sent_tokenize(book))
-    sentences = w2v_bigram_prep(sentences)
+    txt = cleaning_lemmatization(sentences)
+    sentences = w2v_bigram_prep(txt)
     cores = multiprocessing.cpu_count()
 
 

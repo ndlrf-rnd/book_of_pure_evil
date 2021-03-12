@@ -8,3 +8,6 @@ sklearn
 fasttext
 fitz
 PyMuPDF
+deeppavlov
+russian_tagsets
+tensorflow==1.15.0
