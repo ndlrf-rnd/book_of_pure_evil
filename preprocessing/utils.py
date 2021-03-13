@@ -1,7 +1,6 @@
 import re
 import glob
 import spacy
-import ru2
 import fitz
 import os
 from tika import parser

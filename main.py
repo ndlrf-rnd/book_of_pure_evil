@@ -2,12 +2,16 @@ from visualizations.utils import *
 from preprocessing.utils import *
 from gensim.models import Word2Vec
 from nltk.tokenize import sent_tokenize
+from context_vecs.make_w2v import get_w2v_book_representation
 from sklearn.manifold import TSNE
 import multiprocessing
 import gc
 import copy
 import fasttext
 import pandas as pd
+import warnings
+
+warnings.filterwarnings(action='ignore')
 
 def main():
     print("preparing data")
@@ -20,13 +24,15 @@ def main():
     gc.collect()
     
     print(len(data))
-    sentences = []
+    tokenized = []
     for book in data:
-        sentences.extend(sent_tokenize(book))
-    txt = cleaning_lemmatization(sentences)
+        tokenized.append(sent_tokenize(book))
+    txt = cleaning_lemmatization(tokenized[0])
     sentences = w2v_bigram_prep(txt)
     cores = multiprocessing.cpu_count()
-
+    
+    names = ['shmakov']
+    get_w2v_book_representation([txt], names)
 
     print("preparing models\n")
     w2v_model = Word2Vec(min_count=1,
