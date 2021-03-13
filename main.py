@@ -1,5 +1,6 @@
 from visualizations.utils import *
 from preprocessing.utils import *
+from split_utils import accum_txt_sentences
 from gensim.models import Word2Vec
 from nltk.tokenize import sent_tokenize
 from context_vecs.make_w2v import get_w2v_book_representation
@@ -36,11 +37,32 @@ def main():
     txt = cleaning_lemmatization(tokenized[0])
     sentences = w2v_bigram_prep(txt)
     cores = multiprocessing.cpu_count()
-    
-    #names = ['shmakov']
+
+
+    ################# book splitting sentences sum 3 #############
+    representation_way = accum_txt_sentences(3, txt)
     names = ['shmakov_nums']
-    get_w2v_book_representation([txt[:100]], names)
-    get_w2v_book_representation([txt[:100]], names, unks_remove=False)
+    get_w2v_book_representation([representation_way[:60]], names)
+    get_w2v_book_representation([representation_way[:60]], names, unks_remove=False)
+    ################# book splitting sentences sum 3 #############
+
+#    ################# book splitting sentences entire book #############
+#    representation_way = []
+#    accum_sentence = []
+#    count = len(txt)
+#
+#    for sentence in txt:
+#        accum_sentence.extend(sentence)
+#        if not count:
+#            representation_way.append(accum_sentence)
+#            accum_sentence = []
+#            count = len_txt
+#        count -= 1
+#    representation_way.append(accum_sentence)
+#    names = ['shmakov_nums']
+#    get_w2v_book_representation([representation_way], names)
+#    get_w2v_book_representation([representation_way], names, unks_remove=False)
+#    ################# book splitting sentences entire book #############
 
 #    print("preparing models\n")
 #    w2v_model = Word2Vec(min_count=1,
@@ -80,6 +102,4 @@ def main():
     
 
 if __name__ == '__main__':
-    import nltk
-    nltk.download('punkt')
     main()
