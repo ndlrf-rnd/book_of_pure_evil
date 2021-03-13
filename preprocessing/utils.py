@@ -8,7 +8,7 @@ from nltk.corpus import stopwords
 from gensim.models.phrases import Phrases, Phraser
 from deeppavlov import build_model, configs
 
-def reading_txt(txt_folder='../data/'):
+def reading_txt(txt_folder='../data/', keep_numbers=False):
     """
     Function reads txt files and replace double line breaks in it
     Returns string where all txt content concatenated in one string
@@ -24,14 +24,18 @@ def reading_txt(txt_folder='../data/'):
         try:
             with open(txt, 'r') as f:
                 readed = f.read()
-                readed = re.sub("[^А-Яа-я\ \t,.!?]+", ' ', readed)
+                if keep_numbers:
+                    readed = re.sub("[^А-Яа-я0-9\ \t,.!?]+", '', readed)
+                else:
+                    readed = re.sub("[^А-Яа-я\ \t,.!?]+", '', readed)
                 data += ' ' + readed
             books.append(data)
         except:
             print(f'error occured while reading {txt}')
     return books
+    
 
-def reading_pdf(pdf_folder='../data/'):
+def reading_pdf(pdf_folder='../data/', keep_numbers=False):
     """
     Function reads pdf files and replace double line breaks in it
     Returns string where all pdf content concatenated in one string
@@ -52,7 +56,10 @@ def reading_pdf(pdf_folder='../data/'):
         for page_num in range(doc.pageCount):
             page1 = doc.loadPage(page_num)
             page1text = page1.getText("text")
-            page1text = re.sub("[^А-Яа-я\ \t,.!?]+", ' ', page1text)
+            if keep_numbers:
+                page1text = re.sub("[^А-Яа-я0-9\ \t,.!?]+", '', page1text)
+            else:
+                page1text = re.sub("[^А-Яа-я\ \t,.!?]+", '', page1text)
             data += ' ' + page1text + ' '
         books.append(data)
     return books
@@ -83,7 +90,7 @@ def cleaning_lemmatization(splitted_book):
                 parsed_token = line.split()
                 word = parsed_token[2]
                 token_type = parsed_token[3]
-                if len(word) > 2 and word not in russian_stopwords and token_type != "PUNCT":
+                if (len(word) > 2 and word not in russian_stopwords and token_type != "PUNCT") or ():
                     sentence.append(word)
         txt.append(sentence)
     return txt

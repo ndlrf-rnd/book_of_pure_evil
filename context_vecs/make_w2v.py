@@ -127,8 +127,7 @@ def w2v_convert(tokens_dict, book):
         my_save_word2vec_format(binary=True, fname=f'{book}_window_{count}.bin', total_vec=len(w2v_convert), vocab=m.vocab, vectors=m.vectors)
         count += 1
 
-        
-def get_w2v_book_representation(preprocessed_books, names):
+def get_w2v_book_representation(preprocessed_books, names, unks_remove=True):
     path = '../navec_hudlit_v1_12B_500K_300d_100q.tar'
     navec = Navec.load(path)
     count = 0
@@ -136,9 +135,13 @@ def get_w2v_book_representation(preprocessed_books, names):
         tokens_dict = {}
         for sentence in book:
             window = 8
-            ############ MISS <unk> tokens !!!!!!!!!!!!!!!!! ############
-            words_padded = ['<pad>'] * window + [word for word in sentence if word in navec.vocab] + ['<pad>'] * window
-            ############ MISS <unk> tokens !!!!!!!!!!!!!!!!! ############
+            if unks_remove:
+                words_padded = ['<pad>'] * window + [word for word in sentence if word \
+                                                     in navec.vocab] + ['<pad>'] * window
+            else:
+                words_padded = ['<pad>'] * window + [word if word in navec.vocab \
+                                                     else '<unk>' for word in sentence] + ['<pad>'] * window
+
 
             for word_idx in range(window, len(words_padded) - window):
                 word = words_padded[word_idx]
@@ -155,5 +158,8 @@ def get_w2v_book_representation(preprocessed_books, names):
                 ###################### vectors part ######################
 
                 tokens_dict[word] = copy.deepcopy(token_dict)
-        w2v_convert(tokens_dict, names[count])
+        book_name = names[count]
+        if not unks_remove:
+            book_name += '_unks'
+        w2v_convert(tokens_dict, book_name)
         count += 1
