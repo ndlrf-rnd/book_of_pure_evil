@@ -19,10 +19,14 @@ def main():
     print("preparing data")
     pdf_goods = reading_pdf('data/')
     txt_goods = reading_txt('data/')
-    data = pdf_goods + txt_goods
-    data = copy.deepcopy(pdf_goods)
+    pdf_goods_nums = reading_pdf('data/', keep_numbers=True)
+    txt_goods_nums = reading_txt('data/', keep_numbers=True)
+    #data = copy.deepcopy(pdf_goods)
+    data = copy.deepcopy(pdf_goods_nums)
     del pdf_goods
     del txt_goods
+    del pdf_goods_nums
+    del txt_goods_nums
     gc.collect()
     
     print(len(data))
@@ -33,7 +37,8 @@ def main():
     sentences = w2v_bigram_prep(txt)
     cores = multiprocessing.cpu_count()
     
-    names = ['shmakov']
+    #names = ['shmakov']
+    names = ['shmakov_nums']
     get_w2v_book_representation([txt[:100]], names)
     get_w2v_book_representation([txt[:100]], names, unks_remove=False)
 

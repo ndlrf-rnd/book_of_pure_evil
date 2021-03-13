@@ -24,10 +24,11 @@ def reading_txt(txt_folder='../data/', keep_numbers=False):
         try:
             with open(txt, 'r') as f:
                 readed = f.read()
+                readed.replace('ё', 'е')
                 if keep_numbers:
-                    readed = re.sub("[^А-Яа-я0-9\ \t,.!?]+", '', readed)
+                    readed = re.sub("[^А-Яа-я0-9\ \t,.!?]+", ' ', readed)
                 else:
-                    readed = re.sub("[^А-Яа-я\ \t,.!?]+", '', readed)
+                    readed = re.sub("[^А-Яа-я\ \t,.!?]+", ' ', readed)
                 data += ' ' + readed
             books.append(data)
         except:
@@ -56,10 +57,11 @@ def reading_pdf(pdf_folder='../data/', keep_numbers=False):
         for page_num in range(doc.pageCount):
             page1 = doc.loadPage(page_num)
             page1text = page1.getText("text")
+            page1text.replace('ё', 'е')
             if keep_numbers:
-                page1text = re.sub("[^А-Яа-я0-9\ \t,.!?]+", '', page1text)
+                page1text = re.sub("[^А-Яа-я0-9\ \t,.!?]+", ' ', page1text)
             else:
-                page1text = re.sub("[^А-Яа-я\ \t,.!?]+", '', page1text)
+                page1text = re.sub("[^А-Яа-я\ \t,.!?]+", ' ', page1text)
             data += ' ' + page1text + ' '
         books.append(data)
     return books
@@ -90,7 +92,8 @@ def cleaning_lemmatization(splitted_book):
                 parsed_token = line.split()
                 word = parsed_token[2]
                 token_type = parsed_token[3]
-                if (len(word) > 2 and word not in russian_stopwords and token_type != "PUNCT") or ():
+                if (len(word) > 2 and word not in russian_stopwords and token_type != "PUNCT") \
+                or (len(word) == 4 and all(i.isdigit() for i in word)):
                     sentence.append(word)
         txt.append(sentence)
     return txt
