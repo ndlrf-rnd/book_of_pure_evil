@@ -5,7 +5,13 @@ import fasttext
 from gensim.models import Word2Vec
 import gensim
 
-ru_keys = ['сила', 'добро', 'зло', 'мысль', 'школа', 'мир', 'война', "будущее", 'россия', 'германия']
+actions = ["смотреть", "видеть", "думать", "узнать", "догадаться", "чувствовать"]
+objects = ["человек", "бог", "земля", "животное", "война", "мир"]
+comparatives = ["сильный", "слабый", "хороший", "плохой", "мягкий", "твердый"]
+concepts = ["добро", "зло", "лень", "сила", "трудно", "легко"]
+ok = ["гнев", "боль"]
+
+ru_keys = comparatives + ok + objects
 
 def tsne_prep(model, keys=ru_keys):
   """
@@ -25,16 +31,25 @@ def tsne_prep(model, keys=ru_keys):
       words = []
       if type(model) == fasttext.FastText._FastText:
         for _, similar_word in model.get_nearest_neighbors(word, k=30):
-            words.append(similar_word)
-            embeddings.append(model[similar_word])
-        embedding_clusters.append(embeddings)
-        word_clusters.append(words)
+          words.append(similar_word)
+          embeddings.append(model[similar_word])
+          embedding_clusters.append(embeddings)
+          word_clusters.append(words)
       elif type(model) == gensim.models.word2vec.Word2Vec:
-        for similar_word, _ in model.most_similar(word, topn=30):
-            words.append(similar_word)
-            embeddings.append(model[similar_word])
-        embedding_clusters.append(embeddings)
-        word_clusters.append(words)
+        if word in model.vocab:
+          for similar_word, _ in model.most_similar(word, topn=30):
+              words.append(similar_word)
+              embeddings.append(model[similar_word])
+          embedding_clusters.append(embeddings)
+          word_clusters.append(words)
+      elif type(model) == gensim.models.keyedvectors.Word2VecKeyedVectors:
+        if word in model.vocab:
+          for similar_word, _ in model.most_similar(word, topn=30):
+              words.append(similar_word)
+              embeddings.append(model[similar_word])
+          embedding_clusters.append(embeddings)
+          word_clusters.append(words)
+        
   return embedding_clusters, word_clusters
 
 def tsne_plot_similar_words(labels, embedding_clusters, word_clusters, a=0.7, output_path='./', name_addition=''):

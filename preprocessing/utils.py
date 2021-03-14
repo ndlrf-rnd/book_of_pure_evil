@@ -53,17 +53,18 @@ def reading_pdf(pdf_folder='../data/', keep_numbers=False):
         data = ''
         pdf_document = pdf 
         doc = fitz.open(pdf_document)
-        print ("number of pages: %i" % doc.pageCount)
-        for page_num in range(doc.pageCount):
-            page1 = doc.loadPage(page_num)
-            page1text = page1.getText("text")
-            page1text.replace('ё', 'е')
-            if keep_numbers:
-                page1text = re.sub("[^А-Яа-я0-9\ \t,.!?]+", ' ', page1text)
-            else:
-                page1text = re.sub("[^А-Яа-я\ \t,.!?]+", ' ', page1text)
-            data += ' ' + page1text + ' '
-        books.append(data)
+        if doc.pageCount > 3:
+            print ("number of pages: %i" % doc.pageCount)
+            for page_num in range(doc.pageCount):
+                page1 = doc.loadPage(page_num)
+                page1text = page1.getText("text")
+                page1text.replace('ё', 'е')
+                if keep_numbers:
+                    page1text = re.sub("[^А-Яа-я0-9\ \t,.!?]+", ' ', page1text)
+                else:
+                    page1text = re.sub("[^А-Яа-я\ \t,.!?]+", ' ', page1text)
+                data += ' ' + page1text + ' '
+            books.append(data)
     return books
 
 def cleaning_lemmatization(splitted_book):

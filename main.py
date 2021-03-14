@@ -22,8 +22,8 @@ def main():
     txt_goods = reading_txt('data/')
     pdf_goods_nums = reading_pdf('data/', keep_numbers=True)
     txt_goods_nums = reading_txt('data/', keep_numbers=True)
-    #data = copy.deepcopy(pdf_goods)
-    data = copy.deepcopy(pdf_goods_nums)
+    data = copy.deepcopy(pdf_goods)
+    #data = copy.deepcopy(pdf_goods_nums)
     del pdf_goods
     del txt_goods
     del pdf_goods_nums
@@ -41,10 +41,13 @@ def main():
 
     ################# book splitting sentences sum 3 #############
     representation_way = accum_txt_sentences(3, txt)
-    names = ['shmakov_nums']
-    get_w2v_book_representation([representation_way[:60]], names)
-    get_w2v_book_representation([representation_way[:60]], names, unks_remove=False)
+    names = ['gods_comedy']
+    get_w2v_book_representation([representation_way], names)
+    get_w2v_book_representation([representation_way], names, unks_remove=False)
     ################# book splitting sentences sum 3 #############
+
+
+
 
 #    ################# book splitting sentences entire book #############
 #    representation_way = []
@@ -63,6 +66,60 @@ def main():
 #    get_w2v_book_representation([representation_way], names)
 #    get_w2v_book_representation([representation_way], names, unks_remove=False)
 #    ################# book splitting sentences entire book #############
+
+
+    ##################### getting visualization builded model #######################
+
+    for book in names:
+        w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'{book}_unks_window_8.bin', binary=True)
+        embedding_clusters, word_clusters = tsne_prep(w2v_model)
+        tsne_model_en_2d = TSNE(perplexity=20, n_components=2, init='pca', n_iter=6000, random_state=32)
+        embedding_clusters = np.array(embedding_clusters)
+        n, m, k = embedding_clusters.shape
+        embeddings_en_2d = np.array(tsne_model_en_2d.fit_transform(embedding_clusters.reshape(n * m, k))).reshape(n, m, 2)
+        tsne_plot_similar_words(ru_keys, embeddings_en_2d, word_clusters, name_addition=f'{book}_visualisation')
+
+
+    ##################### getting visualization builded model #######################
+
+
+    from graphviz import Digraph
+
+    actions = ["смотреть", "видеть", "думать", "узнать", "догадаться", "чувствовать"]
+    objects = ["человек", "бог", "земля", "животное", "война", "мир"]
+    comparatives = ["сильный", "слабый", "хороший", "плохой", "мягкий", "твердый"]
+    concepts = ["добро", "зло", "лень", "сила", "трудно", "легко"]
+
+    set_names = ['actions', 'objects', 'comparatives', 'concepts']
+    color_keys = ['coral1', 'cyan2', 'firebrick1', 'darkseagreen1', 'darksalmon', 'forestgreen', 'sienna1', 'pink', 'snow3']
+    book_names = ['gods_comedy']
+    for book in book_names:
+        count = 0
+        for key_set in [actions, objects, comparatives, concepts]:
+            w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'{book}_unks_window_8.bin', binary=True)
+            t = Digraph(f'ideas_with_{set_names[count]}_{book}', filename=f'data/ideas_with_{set_names[count]}_{book}.gv', engine='neato')
+
+            t.attr('node', color='gold1', shape='circle', width='0.7')
+            t.node(book)
+
+            for keyword_idx in range(len(key_set)):
+                if key_set[keyword_idx] in w2v_model.vocab:
+                    t.attr('node', color=color_keys[keyword_idx], shape='circle')
+                    t.node(key_set[keyword_idx])
+                    t.edge(book, key_set[keyword_idx])
+
+                    t.attr('node', shape='circle', fixedsize='true', width='1')
+                    for i in w2v_model.most_similar([key_set[keyword_idx]]):
+                        t.node(f'{i[0]}')
+                        t.edge(key_set[keyword_idx], f'{i[0]}')
+            count += 1
+
+            t.attr(overlap='false')
+            t.attr(label=r'Semantic proximity between core ideas\n'
+                         f'in {book}')
+            t.attr(fontsize='12')
+
+            t.view()
 
 #    print("preparing models\n")
 #    w2v_model = Word2Vec(min_count=1,
@@ -85,12 +142,6 @@ def main():
 #    df_train[['txt']].to_csv('train_data.txt', header=False, index=False, sep="\t")
 #    model = fasttext.train_unsupervised('train_data.txt', model='skipgram')
 #
-#    embedding_clusters, word_clusters = tsne_prep(model)
-#    tsne_model_en_2d = TSNE(perplexity=40, n_components=2, init='pca', n_iter=6000, random_state=32)
-#    embedding_clusters = np.array(embedding_clusters)
-#    n, m, k = embedding_clusters.shape
-#    embeddings_en_2d = np.array(tsne_model_en_2d.fit_transform(embedding_clusters.reshape(n * m, k))).reshape(n, m, 2)
-#    tsne_plot_similar_words(ru_keys, embeddings_en_2d, word_clusters, name_addition='fasttext_skipgram')
 #
 #    model = fasttext.train_unsupervised('train_data.txt', model='cbow')
 #    embedding_clusters, word_clusters = tsne_prep(model)
