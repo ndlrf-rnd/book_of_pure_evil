@@ -71,7 +71,7 @@ def main():
     ##################### getting visualization builded model #######################
 
     for book in names:
-        w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'{book}_unks_window_8.bin', binary=True)
+        w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'data/results/{book}_unks_window_8.bin', binary=True)
         embedding_clusters, word_clusters = tsne_prep(w2v_model)
         tsne_model_en_2d = TSNE(perplexity=20, n_components=2, init='pca', n_iter=6000, random_state=32)
         embedding_clusters = np.array(embedding_clusters)
@@ -96,8 +96,8 @@ def main():
     for book in book_names:
         count = 0
         for key_set in [actions, objects, comparatives, concepts]:
-            w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'{book}_unks_window_8.bin', binary=True)
-            t = Digraph(f'ideas_with_{set_names[count]}_{book}', filename=f'data/ideas_with_{set_names[count]}_{book}.gv', engine='neato')
+            w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'data/results/{book}_unks_window_8.bin', binary=True)
+            t = Digraph(f'ideas_with_{set_names[count]}_{book}', filename=f'data/results/ideas_with_{set_names[count]}_{book}.gv', engine='neato')
 
             t.attr('node', color='gold1', shape='circle', width='0.7')
             t.node(book)

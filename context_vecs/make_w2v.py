@@ -124,7 +124,7 @@ def w2v_convert(tokens_dict, book):
         w2v_convert = version
         m.vocab = w2v_convert
         m.vectors = np.array(list(w2v_convert.values()))
-        my_save_word2vec_format(binary=True, fname=f'{book}_window_{count}.bin', total_vec=len(w2v_convert), vocab=m.vocab, vectors=m.vectors)
+        my_save_word2vec_format(binary=True, fname=f'data/results/{book}_window_{count}.bin', total_vec=len(w2v_convert), vocab=m.vocab, vectors=m.vectors)
         count += 1
 
 def get_w2v_book_representation(preprocessed_books, names, unks_remove=True):
