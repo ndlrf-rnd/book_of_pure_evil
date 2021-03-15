@@ -51,8 +51,7 @@ def reading_pdf(pdf_folder='../data/', keep_numbers=False):
     for pdf in glob.glob(os.path.join(pdf_folder, '*.pdf')):
         print(pdf)
         data = ''
-        pdf_document = pdf 
-        doc = fitz.open(pdf_document)
+        doc = fitz.open(pdf)
         if doc.pageCount > 3:
             print ("number of pages: %i" % doc.pageCount)
             for page_num in range(doc.pageCount):

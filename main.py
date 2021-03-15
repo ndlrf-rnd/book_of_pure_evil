@@ -22,7 +22,7 @@ def main():
     txt_goods = reading_txt('data/')
     pdf_goods_nums = reading_pdf('data/', keep_numbers=True)
     txt_goods_nums = reading_txt('data/', keep_numbers=True)
-    data = copy.deepcopy(pdf_goods)
+    data = copy.deepcopy(pdf_goods + txt_goods)
     #data = copy.deepcopy(pdf_goods_nums)
     del pdf_goods
     del txt_goods
@@ -34,38 +34,21 @@ def main():
     tokenized = []
     for book in data:
         tokenized.append(sent_tokenize(book))
-    txt = cleaning_lemmatization(tokenized[0])
-    sentences = w2v_bigram_prep(txt)
+    cleaned = []
+    for tokenized_book in tokenized:
+        cleaned.append(cleaning_lemmatization(tokenized_book))
+    #### for word2vec ####
+    #sentences = w2v_bigram_prep(txt)
+    #### for word2vec ####
     cores = multiprocessing.cpu_count()
 
 
     ################# book splitting sentences sum 3 #############
-    representation_way = accum_txt_sentences(3, txt)
-    names = ['gods_comedy']
-    get_w2v_book_representation([representation_way], names)
-    get_w2v_book_representation([representation_way], names, unks_remove=False)
+    #representation_way = accum_txt_sentences(3, txt)
+    names = [path for path in os.listdir('data/') if '.pdf' in path or '.txt' in path]
+    get_w2v_book_representation(cleaned, names)
+    get_w2v_book_representation(cleaned, names, unks_remove=False)
     ################# book splitting sentences sum 3 #############
-
-
-
-
-#    ################# book splitting sentences entire book #############
-#    representation_way = []
-#    accum_sentence = []
-#    count = len(txt)
-#
-#    for sentence in txt:
-#        accum_sentence.extend(sentence)
-#        if not count:
-#            representation_way.append(accum_sentence)
-#            accum_sentence = []
-#            count = len_txt
-#        count -= 1
-#    representation_way.append(accum_sentence)
-#    names = ['shmakov_nums']
-#    get_w2v_book_representation([representation_way], names)
-#    get_w2v_book_representation([representation_way], names, unks_remove=False)
-#    ################# book splitting sentences entire book #############
 
 
     ##################### getting visualization builded model #######################
@@ -92,8 +75,7 @@ def main():
 
     set_names = ['actions', 'objects', 'comparatives', 'concepts']
     color_keys = ['coral1', 'cyan2', 'firebrick1', 'darkseagreen1', 'darksalmon', 'forestgreen', 'sienna1', 'pink', 'snow3']
-    book_names = ['gods_comedy']
-    for book in book_names:
+    for book in names:
         count = 0
         for key_set in [actions, objects, comparatives, concepts]:
             w2v_model = gensim.models.keyedvectors.Word2VecKeyedVectors.load_word2vec_format(f'data/results/{book}_unks_window_8.bin', binary=True)
