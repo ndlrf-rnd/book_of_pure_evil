@@ -1,19 +1,19 @@
 # book_of_pure_evil
+extremism text classification
 
-## what is it about?
-analysis of banned in russia books
+## algo results
 
-## how to use it?
-1. clone the repo
-  ```sh
-  git clone https://github.com/ndlrf-rnd/book_of_pure_evil.git
-  ```
-2. install dependencies
-  ```sh
-  pip install -r requirements.txt
-  ```
-3. if you want to make embeddings on your data, fill "data" folder with files of format "pdf" and "txt"
-4. execute main that takes pdf's and txt's files from "data" folder and make model with visualization
-  ```sh
-  python3 main.py
-  ```
+1-s, 3-s, 5-s means that we split training and test data by 1 sentence, 3 sentences, 5 sentences accordingly 
+
+### word2vec + Random Forest classification; metric: ROC-AUC
+| Model/Split               |  1-s  |  3-s  |  5-s  |
+|:--------------------------|:------|:------|:------|
+| our_corpus (2 epochs)     | 0.55  | 0.58  | 0.57  | 
+| rusvectores               | 0.71  | 0.69  | 0.67  | 
+
+### fasttext (train_supervised method); metric: PRECISION and RECALL (they are the same)
+| Model/Split               |  1-s  |  3-s  |
+|:--------------------------|:------|:------|
+| our_corpus (2 epochs)     | 0.88  | 0.95  |
+| rusvectores               | 0.87  | 0.94  |
+| baseline (w/o pretrain)   | 0.88  | 0.94  |
