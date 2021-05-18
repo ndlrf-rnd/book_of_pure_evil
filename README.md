@@ -1,5 +1,8 @@
 # book_of_pure_evil
-extremism text classification
+Main tasks of project:
+1. extremism text classification
+2. text generation with GAN/RL or both
+3. book ideas visualization
 
 ## algo results
 
